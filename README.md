@@ -82,3 +82,15 @@ sudo python3 main.py
 ## Contributing
 
 This tool is designed to make SSH server configuration management safer and more accessible. Contributions for additional features, bug fixes, or documentation improvements are welcome.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+**Supun Hewagamage** - [@supunhg](https://github.com/supunhg)
+
+## Copyright
+
+Copyright (c) 2025 Supun Hewagamage
