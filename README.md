@@ -81,8 +81,6 @@ sudo python3 main.py
 ## Screenshots
 
 <img width="1207" height="725" alt="image" src="https://github.com/user-attachments/assets/8281ec8a-1dc2-4864-b4df-b3245281b8a7" />
-<img width="1203" height="732" alt="image" src="https://github.com/user-attachments/assets/1e6a37f0-dd36-4bb8-ab36-6313559d3813" />
-
 
 ## Contributing
 
