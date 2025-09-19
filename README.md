@@ -1,6 +1,6 @@
 # SSH Sentinel - SSH Server Configuration Editor
 
-A specialized GUI tool for editing SSH server configuration (`/etc/ssh/sshd_config`) built with Python and PyQt6. SSH Sentinel provides an intuitive interface for managing SSH server daemon settings with safety features like automatic backups and configuration validation.
+A specialized GUI tool for editing SSH server configuration (`/etc/ssh/sshd_config`) built with Python and PyQt6. SSH Sentinel provides an intuitive interface for managing SSH server daemon settings with safety features like automatic backups.
 
 ## Features
 
@@ -9,7 +9,6 @@ A specialized GUI tool for editing SSH server configuration (`/etc/ssh/sshd_conf
 - **Root access protection**: Automatically requires root privileges for system configuration files
 - **Option management**: Add, edit, remove, and comment/uncomment configuration options
 - **Interactive explanations**: Built-in descriptions for common SSH server options
-- **Real-time validation**: Immediate feedback on configuration changes
 
 ### Safety & Backup Features
 - **Automatic backups**: Always creates `.bak` files before any changes
