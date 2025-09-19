@@ -44,21 +44,106 @@ class SSHDMainWindow(QMainWindow):
         except Exception:
             # Default explanations for common sshd_config options
             self.expl = {
-                'Port': 'Port number that sshd listens on. Default is 22.',
-                'ListenAddress': 'IP address(es) that sshd should listen on.',
-                'HostKey': 'Private key files used by sshd for host authentication.',
-                'PermitRootLogin': 'Whether root can log in using ssh. Values: yes, no, prohibit-password, forced-commands-only.',
-                'PasswordAuthentication': 'Whether password authentication is allowed.',
-                'PubkeyAuthentication': 'Whether public key authentication is allowed.',
-                'AuthorizedKeysFile': 'File containing public keys for public key authentication.',
-                'PermitEmptyPasswords': 'Whether server allows login to accounts with empty password strings.',
-                'ChallengeResponseAuthentication': 'Whether challenge-response authentication is allowed.',
-                'UsePAM': 'Whether Pluggable Authentication Modules interface is enabled.',
-                'X11Forwarding': 'Whether X11 forwarding is permitted.',
-                'PrintMotd': 'Whether sshd should print /etc/motd when a user logs in interactively.',
-                'AcceptEnv': 'Environment variables that may be sent by the client.',
-                'Subsystem': 'Configure an external subsystem (e.g. file transfer daemon).',
-                'Include': 'Include the specified configuration file(s).'
+                # Connection Settings
+                'Port': 'Port number that sshd listens on. Default is 22. Can specify multiple ports.',
+                'ListenAddress': 'IP address(es) that sshd should listen on. Use 0.0.0.0 for all IPv4, :: for all IPv6.',
+                'AddressFamily': 'Restricts protocol versions. Values: any (default), inet (IPv4 only), inet6 (IPv6 only).',
+                'Protocol': 'SSH protocol versions to support. Use "2" for SSH-2 only (recommended).',
+                'TCPKeepAlive': 'Send TCP keepalive messages to detect dead connections. Values: yes, no.',
+                'ClientAliveInterval': 'Timeout in seconds after which server sends keepalive message. 0 disables.',
+                'ClientAliveCountMax': 'Number of keepalive messages before disconnecting unresponsive client.',
+                'MaxStartups': 'Maximum number of concurrent unauthenticated connections. Format: start:rate:full.',
+                'MaxSessions': 'Maximum number of open sessions permitted per network connection.',
+                'MaxAuthTries': 'Maximum number of authentication attempts per connection. Default is 6.',
+                
+                # Host Keys
+                'HostKey': 'Private key files used by sshd for host authentication. Specify one per key type.',
+                'HostKeyAlgorithms': 'Comma-separated list of host key algorithms that the server offers.',
+                'PubkeyAcceptedKeyTypes': 'Comma-separated list of public key types accepted for public key authentication.',
+                'HostCertificate': 'File containing host certificate used for host authentication.',
+                'TrustedUserCAKeys': 'File containing certificate authorities trusted to sign user certificates.',
+                
+                # Authentication
+                'PermitRootLogin': 'Whether root can log in. Values: yes, no, prohibit-password, forced-commands-only.',
+                'PasswordAuthentication': 'Whether password authentication is allowed. Disable for key-only auth.',
+                'PubkeyAuthentication': 'Whether public key authentication is allowed. Should be enabled.',
+                'AuthorizedKeysFile': 'File(s) containing public keys for authentication. Default: .ssh/authorized_keys.',
+                'AuthorizedKeysCommand': 'Command to retrieve authorized keys. Use with AuthorizedKeysCommandUser.',
+                'AuthorizedKeysCommandUser': 'User to run AuthorizedKeysCommand as. Must not be root.',
+                'PermitEmptyPasswords': 'Allow login to accounts with empty passwords. Highly discouraged.',
+                'ChallengeResponseAuthentication': 'Enable challenge-response authentication (keyboard-interactive).',
+                'KerberosAuthentication': 'Enable Kerberos authentication. Requires proper Kerberos setup.',
+                'GSSAPIAuthentication': 'Enable GSSAPI authentication. Used with Kerberos/Active Directory.',
+                'UsePAM': 'Enable Pluggable Authentication Modules. Required for many auth methods.',
+                'AuthenticationMethods': 'Required authentication methods. Use for multi-factor auth.',
+                'RequiredRSASize': 'Minimum RSA key size in bits. Default varies by SSH version.',
+                
+                # Access Control
+                'AllowUsers': 'Space-separated list of users allowed to log in. Supports wildcards and patterns.',
+                'DenyUsers': 'Space-separated list of users denied login. Takes precedence over AllowUsers.',
+                'AllowGroups': 'Space-separated list of groups allowed to log in. Members can connect.',
+                'DenyGroups': 'Space-separated list of groups denied login. Takes precedence over AllowGroups.',
+                'LoginGraceTime': 'Time in seconds for user to authenticate. Connection closed if exceeded.',
+                'StrictModes': 'Check file permissions and ownership of user files and home directory.',
+                'PermitUserEnvironment': 'Allow ~/.ssh/environment and environment= in authorized_keys.',
+                
+                # Forwarding and Tunneling
+                'X11Forwarding': 'Allow X11 forwarding. Required for GUI applications over SSH.',
+                'X11DisplayOffset': 'First display number available for X11 forwarding. Default is 10.',
+                'X11UseLocalhost': 'Bind X11 forwarding server to loopback address or wildcard address.',
+                'AllowTcpForwarding': 'Allow TCP port forwarding. Values: yes, no, local, remote.',
+                'GatewayPorts': 'Allow remote hosts to connect to forwarded ports. Values: yes, no, clientspecified.',
+                'PermitTunnel': 'Allow tun device forwarding. Values: yes, no, point-to-point, ethernet.',
+                'AllowStreamLocalForwarding': 'Allow Unix domain socket forwarding. Values: yes, no, local, remote.',
+                'StreamLocalBindUnlink': 'Remove existing Unix domain socket before creating new one.',
+                
+                # Security Features
+                'PubkeyAuthOptions': 'Comma-separated list of public key authentication options.',
+                'HostbasedAuthentication': 'Enable host-based authentication using .rhosts or .shosts files.',
+                'HostbasedUsesNameFromPacketOnly': 'Use hostname from SSH packet for host-based auth.',
+                'IgnoreRhosts': 'Ignore .rhosts and .shosts files. Should be enabled for security.',
+                'IgnoreUserKnownHosts': 'Ignore ~/.ssh/known_hosts for host-based authentication.',
+                'RhostsRSAAuthentication': 'Enable rhosts RSA authentication (SSH protocol 1 only).',
+                'RSAAuthentication': 'Enable RSA authentication (SSH protocol 1 only). Deprecated.',
+                'PermitTTY': 'Allow pty allocation. Required for interactive shells.',
+                'PermitOpen': 'Restrict port forwarding destinations. Use "none" to disable, "any" to allow all.',
+                'ForceCommand': 'Force execution of specified command for all users. Overrides user commands.',
+                'ChrootDirectory': 'Restrict users to specified directory. Use %h for home directory substitution.',
+                
+                # Logging and Monitoring
+                'SyslogFacility': 'Syslog facility for logging SSH messages. Default is AUTH.',
+                'LogLevel': 'Logging verbosity. Values: QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG, DEBUG1-3.',
+                'PrintMotd': 'Print /etc/motd when user logs in interactively. May duplicate PAM motd.',
+                'PrintLastLog': 'Print date and time of last login when user logs in interactively.',
+                'Banner': 'File containing message displayed before authentication. Use for legal notices.',
+                'VersionAddendum': 'String appended to SSH version. Useful for identifying custom builds.',
+                
+                # Environment and Execution
+                'AcceptEnv': 'Environment variables that may be sent by client and set on server.',
+                'PermitUserRC': 'Allow execution of ~/.ssh/rc when user logs in.',
+                'SetEnv': 'Set environment variables for authenticated sessions.',
+                'Subsystem': 'Configure external subsystem (e.g., sftp). Format: name command [args...]',
+                'Include': 'Include specified configuration file(s). Supports wildcards.',
+                'Match': 'Conditional configuration block. Apply settings based on user, group, host, etc.',
+                
+                # Cryptographic Settings
+                'Ciphers': 'Comma-separated list of symmetric ciphers allowed. Order indicates preference.',
+                'MACs': 'Comma-separated list of message authentication codes allowed.',
+                'KexAlgorithms': 'Comma-separated list of key exchange algorithms allowed.',
+                'RekeyLimit': 'Data limit and time limit for rekeying. Format: "data_limit time_limit".',
+                'FingerprintHash': 'Hash algorithm for key fingerprints. Values: md5, sha256.',
+                
+                # Advanced Options
+                'Compression': 'Enable compression after authentication. Values: yes, no, delayed.',
+                'UseDNS': 'Look up remote hostname and verify resolved IP matches connection IP.',
+                'VersionAddendum': 'String to append to SSH version identification string.',
+                'DebianBanner': 'Show Debian-specific banner. Debian/Ubuntu specific option.',
+                'UsePrivilegeSeparation': 'Use privilege separation for security. Values: yes, no, sandbox.',
+                'ShowPatchLevel': 'Show patch level in version string. OpenSSH specific.',
+                'DisableForwarding': 'Disable all forwarding features. Shortcut for multiple no settings.',
+                'ExposeAuthInfo': 'Expose authentication information via environment variables.',
+                'RDomain': 'Set routing domain for connection. BSD-specific feature.',
+                'IPQoS': 'IP Quality of Service settings for interactive and bulk traffic.'
             }
 
         self.setup_ui()
