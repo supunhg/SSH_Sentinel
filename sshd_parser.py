@@ -99,45 +99,50 @@ class SSHDConfig:
     def load(self):
         if not os.path.exists(self.path):
             raise FileNotFoundError(f'SSH server config not found: {self.path}')
-        
+
         with open(self.path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-        
+
         self.options = []
         self.includes = []
         self.comments = []
         self.all_lines = []
-        
+
         i = 0
         while i < len(lines):
             raw_line = lines[i]
             line = raw_line.rstrip('\n')
             stripped = line.strip()
             line_num = i + 1
-            
+
             block_length = self._is_ignored_comment_block(lines, i)
             if stripped.startswith('#') and block_length > 0:
                 i += block_length
                 continue
-            
-            if not stripped or stripped.startswith('#'):
-                if stripped.startswith('#'):
-                    uncommented = stripped.lstrip('#').strip()
-                    opt_match = re.match(r'^(\S+)(\s+(.*))?$', uncommented)
-                    if opt_match and uncommented:
-                        key = opt_match.group(1)
-                        value = opt_match.group(3) if opt_match.group(3) else ''
-                        option = SSHDOption(key=key, value=value, raw=line, commented=True, line_number=line_num)
-                        self.all_lines.append(option)
-                        i += 1
-                        continue
-                
+
+            # Ignore empty lines
+            if not stripped:
+                i += 1
+                continue
+
+            # Handle comment lines
+            if stripped.startswith('#'):
+                uncommented = stripped.lstrip('#').strip()
+                opt_match = re.match(r'^(\S+)(\s+(.*))?$', uncommented)
+                if opt_match and uncommented:
+                    key = opt_match.group(1)
+                    value = opt_match.group(3) if opt_match.group(3) else ''
+                    option = SSHDOption(key=key, value=value, raw=line, commented=True, line_number=line_num)
+                    self.all_lines.append(option)
+                    i += 1
+                    continue
+
                 comment = SSHDOption(key='', value=None, raw=line, commented=True, line_number=line_num)
                 self.comments.append(comment)
                 self.all_lines.append(comment)
                 i += 1
                 continue
-            
+
             include_match = re.match(r'^Include\s+(.+)$', stripped, re.IGNORECASE)
             if include_match:
                 include_path = include_match.group(1)
@@ -148,7 +153,7 @@ class SSHDConfig:
                 self.all_lines.append(option)
                 i += 1
                 continue
-            
+
             opt_match = re.match(r'^(\S+)(\s+(.*))?$', stripped)
             if opt_match:
                 key = opt_match.group(1)
@@ -160,7 +165,7 @@ class SSHDConfig:
                 comment = SSHDOption(key='', value=None, raw=line, commented=True, line_number=line_num)
                 self.comments.append(comment)
                 self.all_lines.append(comment)
-            
+
             i += 1
 
     def to_text(self) -> str:
