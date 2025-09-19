@@ -8,10 +8,8 @@ from PyQt6.QtWidgets import QApplication
 from sshd_gui import SSHDMainWindow
 
 def main():
-    # require root
     utils.require_root_or_exit()
     
-    # Use SSH server configuration file
     config_path = '/etc/ssh/sshd_config'
     
     app = QApplication(sys.argv)

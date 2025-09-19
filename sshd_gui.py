@@ -34,15 +34,12 @@ class SSHDMainWindow(QMainWindow):
             QMessageBox.critical(self, 'Error', f'Failed to load SSH server config: {str(e)}')
             sys.exit(1)
         
-        # ensure bak exists
         utils.ensure_backup_exists(self.sshd.path)
 
-        # load explanations for SSH server options
         try:
             with open('sshd_explanations.json', 'r', encoding='utf-8') as f:
                 self.expl = json.load(f)
         except Exception:
-            # Default explanations for common sshd_config options
             self.expl = {
                 # Connection Settings
                 'Port': 'Port number that sshd listens on. Default is 22. Can specify multiple ports.',
@@ -155,19 +152,15 @@ class SSHDMainWindow(QMainWindow):
         layout = QHBoxLayout()
         container.setLayout(layout)
 
-        # Left panel: options list and controls
         left = QVBoxLayout()
         
-        # File info
         info_label = QLabel(f"Editing: {self.sshd.path}")
         info_label.setStyleSheet("font-weight: bold; color: #0066cc;")
         left.addWidget(info_label)
         
-        # Options list
         self.list_widget = QListWidget()
         left.addWidget(self.list_widget)
         
-        # Control buttons
         btn_layout = QHBoxLayout()
         self.btn_backup = QPushButton('Create Backup')
         self.btn_restore = QPushButton('Restore from Backup')
@@ -179,10 +172,8 @@ class SSHDMainWindow(QMainWindow):
 
         layout.addLayout(left, 2)
 
-        # Right panel: editor
         right = QVBoxLayout()
         
-        # Editor area
         self.form_area = QScrollArea()
         self.form_widget = QWidget()
         self.form_layout = QFormLayout()
@@ -191,7 +182,6 @@ class SSHDMainWindow(QMainWindow):
         self.form_area.setWidgetResizable(True)
         right.addWidget(self.form_area)
 
-        # Save buttons
         save_layout = QHBoxLayout()
         self.btn_save_bak = QPushButton('Save as Backup')
         self.btn_save = QPushButton('Save & Apply')
@@ -201,7 +191,6 @@ class SSHDMainWindow(QMainWindow):
 
         layout.addLayout(right, 3)
 
-        # Connect signals
         self.list_widget.currentItemChanged.connect(self.on_select_option)
         self.btn_backup.clicked.connect(self.on_backup)
         self.btn_restore.clicked.connect(self.on_restore)
@@ -209,7 +198,6 @@ class SSHDMainWindow(QMainWindow):
         self.btn_save.clicked.connect(self.on_save)
         self.btn_save_bak.clicked.connect(self.on_save_as_bak)
 
-        # Current editor widgets
         self.current_widgets = []
 
     def reload_options_list(self):
@@ -232,22 +220,18 @@ class SSHDMainWindow(QMainWindow):
         option = current.option
         self.clear_form()
         
-        # Option key
         key_label = QLabel('Option:')
         key_edit = QLineEdit(option.key)
         self.form_layout.addRow(key_label, key_edit)
         
-        # Option value
         value_label = QLabel('Value:')
         value_edit = QLineEdit(option.value if option.value else '')
         self.form_layout.addRow(value_label, value_edit)
         
-        # Commented checkbox
         comment_chk = QCheckBox('Commented out (disabled)')
         comment_chk.setChecked(option.commented)
         self.form_layout.addRow(QLabel(''), comment_chk)
         
-        # Explanation
         if option.key in self.expl:
             expl_label = QLabel('Description:')
             expl_text = QTextEdit()
@@ -257,7 +241,6 @@ class SSHDMainWindow(QMainWindow):
             self.form_layout.addRow(expl_label, expl_text)
             self.current_widgets.extend([expl_label, expl_text])
         
-        # Delete button
         delete_btn = QPushButton('Delete This Option')
         delete_btn.setStyleSheet("background-color: #cc0000; color: white;")
         delete_btn.clicked.connect(lambda: self.delete_option(current.index))
@@ -265,7 +248,6 @@ class SSHDMainWindow(QMainWindow):
         
         self.current_widgets.extend([key_label, key_edit, value_label, value_edit, comment_chk, delete_btn])
         
-        # Store references for saving
         current.editor_refs = {
             'key': key_edit,
             'value': value_edit,
@@ -317,26 +299,20 @@ class SSHDMainWindow(QMainWindow):
     def refresh_configuration(self):
         """Reload the configuration from disk and refresh the UI"""
         try:
-            # Reload the configuration from file
             self.sshd.load()
-            # Refresh the options list
             self.reload_options_list()
-            # Clear the current form
             self.clear_form()
         except Exception as e:
             QMessageBox.critical(self, 'Error', f'Failed to refresh configuration: {str(e)}')
 
     def on_save(self):
         try:
-            # Create backup first
             self.sshd.write_backup()
             
-            # Save changes
             text = self.collect_and_serialize()
             with open(self.sshd.path, 'w', encoding='utf-8') as f:
                 f.write(text)
             
-            # Refresh the configuration after successful save
             self.refresh_configuration()
             
             QMessageBox.information(self, 'Saved', 
@@ -347,7 +323,6 @@ class SSHDMainWindow(QMainWindow):
             QMessageBox.critical(self, 'Error', str(e))
 
     def collect_and_serialize(self) -> str:
-        # Update options from editor widgets
         for i in range(self.list_widget.count()):
             item = self.list_widget.item(i)
             if hasattr(item, 'editor_refs'):
@@ -362,7 +337,6 @@ class SSHDMainWindow(QMainWindow):
                 option.value = new_value
                 option.commented = new_commented
                 
-                # Update raw representation
                 if new_key:
                     raw = f'{new_key} {new_value}' if new_value else new_key
                     if new_commented:

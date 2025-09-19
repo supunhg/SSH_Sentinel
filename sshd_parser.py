@@ -27,12 +27,10 @@ class SSHDConfig:
         self.path = path or '/etc/ssh/sshd_config'
         self.options: List[SSHDOption] = []
         self.includes: List[SSHDInclude] = []
-        self.comments: List[SSHDOption] = []  # pure comment lines
-        self.all_lines: List[SSHDOption] = []  # all lines in order
+        self.comments: List[SSHDOption] = []  
+        self.all_lines: List[SSHDOption] = []  
         
-        # Comment blocks to ignore
         self.ignored_comment_blocks = [
-            # PAM comment block
             [
                 "# Set this to 'yes' to enable PAM authentication, account processing,",
                 "# and session processing. If this is enabled, PAM authentication will",
@@ -44,14 +42,12 @@ class SSHDConfig:
                 "# PAM authentication, then enable this but set PasswordAuthentication",
                 "# and KbdInteractiveAuthentication to 'no'."
             ],
-            # Keyboard-interactive authentication comment block
             [
                 "# Change to \"yes\" to enable keyboard-interactive authentication.  Depending on",
                 "# the system's configuration, this may involve passwords, challenge-response,",
                 "# one-time passwords or some combination of these and other methods.",
                 "# Beware issues with some PAM modules and threads."
             ],
-            # SSH server system-wide configuration header
             [
                 "#This is the sshd server system-wide configuration file.  See",
                 "# sshd_config(5) for more information.",
@@ -63,7 +59,6 @@ class SSHDConfig:
                 "# possible, but leave them commented.  Uncommented options override the",
                 "# default value."
             ],
-            # Section headers and explanatory comments
             ["# Ciphers and keying"],
             ["# Logging"],
             ["# Authentication:"],
@@ -97,9 +92,9 @@ class SSHDConfig:
                     break
             
             if block_matches:
-                return len(ignored_block)  # Return the length of the matched block
+                return len(ignored_block)  
         
-        return 0  # No block matched
+        return 0  
 
     def load(self):
         if not os.path.exists(self.path):
@@ -120,19 +115,14 @@ class SSHDConfig:
             stripped = line.strip()
             line_num = i + 1
             
-            # Check if this is the start of any ignored comment block
             block_length = self._is_ignored_comment_block(lines, i)
             if stripped.startswith('#') and block_length > 0:
-                # Skip the entire ignored comment block
                 i += block_length
                 continue
             
-            # Empty line or pure comment
             if not stripped or stripped.startswith('#'):
-                # Check if it's a commented option
                 if stripped.startswith('#'):
                     uncommented = stripped.lstrip('#').strip()
-                    # Try to parse as option
                     opt_match = re.match(r'^(\S+)(\s+(.*))?$', uncommented)
                     if opt_match and uncommented:
                         key = opt_match.group(1)
@@ -142,27 +132,23 @@ class SSHDConfig:
                         i += 1
                         continue
                 
-                # Pure comment or empty line
                 comment = SSHDOption(key='', value=None, raw=line, commented=True, line_number=line_num)
                 self.comments.append(comment)
                 self.all_lines.append(comment)
                 i += 1
                 continue
             
-            # Include directive
             include_match = re.match(r'^Include\s+(.+)$', stripped, re.IGNORECASE)
             if include_match:
                 include_path = include_match.group(1)
                 include = SSHDInclude(path=include_path, raw=line, line_number=line_num)
                 self.includes.append(include)
-                # Also add as option for editing
                 option = SSHDOption(key='Include', value=include_path, raw=line, commented=False, line_number=line_num)
                 self.options.append(option)
                 self.all_lines.append(option)
                 i += 1
                 continue
             
-            # Regular option
             opt_match = re.match(r'^(\S+)(\s+(.*))?$', stripped)
             if opt_match:
                 key = opt_match.group(1)
@@ -171,7 +157,6 @@ class SSHDConfig:
                 self.options.append(option)
                 self.all_lines.append(option)
             else:
-                # Unrecognized line, treat as comment
                 comment = SSHDOption(key='', value=None, raw=line, commented=True, line_number=line_num)
                 self.comments.append(comment)
                 self.all_lines.append(comment)
@@ -182,7 +167,6 @@ class SSHDConfig:
         parts = []
         for option in self.all_lines:
             if option.commented and option.key:
-                # Ensure it starts with #
                 if not option.raw.strip().startswith('#'):
                     parts.append(f'#{option.raw}')
                 else:
