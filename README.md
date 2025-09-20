@@ -6,6 +6,7 @@ A specialized GUI tool for editing SSH server configuration (`/etc/ssh/sshd_conf
 
 ### SSH Server Configuration Management
 - **Complete sshd_config editing**: Edit SSH server daemon configuration with a user-friendly GUI
+- **Real-time search**: Instantly filter and search for configuration options as you type
 - **Root access protection**: Automatically requires root privileges for system configuration files
 - **Option management**: Add, edit, remove, and comment/uncomment configuration options
 - **Interactive explanations**: Built-in descriptions for common SSH server options
