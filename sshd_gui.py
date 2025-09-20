@@ -153,14 +153,23 @@ class SSHDMainWindow(QMainWindow):
         container.setLayout(layout)
 
         left = QVBoxLayout()
-        
+
         info_label = QLabel(f"Editing: {self.sshd.path}")
         info_label.setStyleSheet("font-weight: bold; color: #0066cc;")
         left.addWidget(info_label)
-        
+
+        # --- Search bar ---
+        search_layout = QHBoxLayout()
+        search_label = QLabel("Search:")
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Type to filter options...")
+        search_layout.addWidget(search_label)
+        search_layout.addWidget(self.search_bar)
+        left.addLayout(search_layout)
+
         self.list_widget = QListWidget()
         left.addWidget(self.list_widget)
-        
+
         btn_layout = QHBoxLayout()
         self.btn_backup = QPushButton('Create Backup')
         self.btn_restore = QPushButton('Restore from Backup')
@@ -173,7 +182,7 @@ class SSHDMainWindow(QMainWindow):
         layout.addLayout(left, 2)
 
         right = QVBoxLayout()
-        
+
         self.form_area = QScrollArea()
         self.form_widget = QWidget()
         self.form_layout = QFormLayout()
@@ -198,7 +207,21 @@ class SSHDMainWindow(QMainWindow):
         self.btn_save.clicked.connect(self.on_save)
         self.btn_save_bak.clicked.connect(self.on_save_as_bak)
 
+        # Connect search bar to filter function
+        self.search_bar.textChanged.connect(self.filter_options_list)
+
         self.current_widgets = []
+
+    def filter_options_list(self):
+        query = self.search_bar.text().strip().lower()
+        self.list_widget.clear()
+        for i, option in enumerate(self.sshd.all_lines):
+            display_text = f"{option.key}: {option.value}" if option.key and option.value else option.key or "<comment>"
+            if option.commented:
+                display_text = f"# {display_text}"
+            if not query or (option.key and query in option.key.lower()) or (option.value and query in str(option.value).lower()) or (display_text and query in display_text.lower()):
+                item = SSHDOptionItem(option, i)
+                self.list_widget.addItem(item)
 
     def reload_options_list(self):
         self.list_widget.clear()
