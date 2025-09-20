@@ -79,9 +79,11 @@ sudo python3 main.py
 - `sshd_parser.py` - Parser for sshd_config format
 - `utils.py` - Utility functions (root checking, backups)
 
-## Screenshot
+## Screenshots
 
-<img width="1207" height="725" alt="image" src="https://github.com/user-attachments/assets/8281ec8a-1dc2-4864-b4df-b3245281b8a7" />
+<img width="1204" height="733" alt="image" src="https://github.com/user-attachments/assets/916ecc29-eab6-42e7-8022-27f4b4501038" />
+<img width="1204" height="727" alt="image" src="https://github.com/user-attachments/assets/1a126a75-0e53-41d5-be9e-9ce6d6f89b67" />
+<img width="1204" height="734" alt="image" src="https://github.com/user-attachments/assets/a1cf3fda-9b6f-49c8-aa5e-730a5ee1ee04" />
 
 ## Contributing
 
